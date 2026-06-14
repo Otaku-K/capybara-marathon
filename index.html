@@ -54,13 +54,16 @@
         .progress-wrapper { background: rgba(0, 0, 0, 0.06); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 12px; }
         .progress-bar { width: 0%; height: 100%; background: var(--danger); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
 
-        /* Tabs */
-        .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border); }
-        .tabs::-webkit-scrollbar { height: 5px; }
-        .tabs::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .tab-btn { white-space: nowrap; background: #f1f5f9; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+        /* Tabs 响应式平铺优化 (解决手机端滚动问题) */
+        .tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding-bottom: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border); }
+        .tab-btn { text-align: center; background: #f1f5f9; border: none; padding: 10px 2px; border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.82rem; }
         .tab-btn:hover { background: #e2e8f0; color: var(--text-dark); }
         .tab-btn.active { background: var(--primary); color: #ffffff; box-shadow: 0 4px 12px rgba(202, 138, 4, 0.25); }
+        
+        @media (min-width: 500px) {
+            .tabs { gap: 8px; }
+            .tab-btn { padding: 10px 10px; font-size: 0.95rem; }
+        }
 
         /* 工具栏 */
         .action-banner { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
@@ -159,6 +162,7 @@
         </div>
     </div>
 
+    <!-- 顶栏 Tab 容器 -->
     <div class="tabs" id="tabs-container"></div>
 
     <div class="action-banner">
@@ -357,7 +361,7 @@
             `;
             c.appendChild(card);
 
-            // 极简双向绑定
+            // 双向绑定
             const bind = (id, fn) => card.querySelector(id).addEventListener('input', fn);
             bind(`#stk-${key}`, e => { state.inventory[key] = Math.max(0, parseInt(e.target.value)||0); saveState(); renderList(); calculateScores(); });
             bind(`#pri-${key}`, e => { state.priorities[key] = parseInt(e.target.value); saveState(); });
@@ -377,11 +381,10 @@
         let rem = state.targetScore;
         
         let pool = keys.map(k => ({ k, r: globalItemsRegistry[k].ratio, s: state.inventory[k]||0, p: state.priorities[k]||3 }));
-        // 核心算法：优先级越小越靠前。如果优先级一样，分值大的靠前。
         pool.sort((a, b) => a.p !== b.p ? a.p - b.p : b.r - a.r);
 
         for (let item of pool) {
-            if (rem <= 0 || item.p === 5) continue; // 达标或遇到“锁死保留”则跳过
+            if (rem <= 0 || item.p === 5) continue;
             let maxPts = item.s * item.r;
             if (maxPts <= rem) {
                 state.plans[state.currentDay][item.k] = item.s; rem -= maxPts;
@@ -420,14 +423,12 @@
             msg.innerText = `⏳ 差 ${(state.targetScore - total).toLocaleString()} 分`;
         }
 
-        // 智能防溢出警告 (溢出 > 1500分时触发)
         const warn = document.getElementById('overshoot-warning');
         if (total - state.targetScore > 1500) {
             warn.style.display = 'flex';
             warn.innerHTML = `⚠️ <b>警告：溢出 ${(total - state.targetScore).toLocaleString()} 分，亏损严重！</b>建议在上方减去1个高分道具(如限定/宝石)，用低分道具(如培育)精细填缝。`;
         } else { warn.style.display = 'none'; }
 
-        // 生成可复制文本
         const sumDiv = document.getElementById('summary-content');
         if(details.length > 0) {
             currentSummaryText = `[卡皮马拉松 ${marathonConfig[state.currentDay].name.split(" ")[0]} 策略]
@@ -451,7 +452,22 @@
         showToast("🧹 当日规划已清空"); renderList(); calculateScores(); saveState();
     }
 
-    window.onload = () => { loadState(); initTabs(); renderList(); calculateScores(); renderGlobalInv(); };
+    // --- 初始化入口 (新增自动识别今天星期几与平铺) ---
+    window.onload = () => { 
+        loadState(); 
+        
+        // 自动识别当天星期几 (0代表周日，1-6代表周一到周六)
+        let today = new Date().getDay();
+        if (today === 0) today = 7; // 工具字典中周日对应的Key是7
+        state.currentDay = today; 
+        
+        initTabs(); 
+        renderList(); 
+        calculateScores(); 
+        renderGlobalInv(); 
+        
+        showToast(`📅 欢迎回来！已自动定位到今天 (${marathonConfig[today].name.split(" ")[0]})`, "info");
+    };
 </script>
 
 </body>
