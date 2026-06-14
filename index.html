@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capybara Go! 卡皮马拉松</title>
+    <title>Capybara Go! 卡皮马拉松)</title>
     <style>
         :root {
             --primary: #ca8a04;
@@ -54,7 +54,7 @@
         .progress-wrapper { background: rgba(0, 0, 0, 0.06); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 12px; }
         .progress-bar { width: 0%; height: 100%; background: var(--danger); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
 
-        /* Tabs 响应式平铺优化 (解决手机端滚动问题) */
+        /* Tabs 响应式平铺优化 */
         .tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding-bottom: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border); }
         .tab-btn { text-align: center; background: #f1f5f9; border: none; padding: 10px 2px; border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.82rem; }
         .tab-btn:hover { background: #e2e8f0; color: var(--text-dark); }
@@ -77,8 +77,6 @@
         .btn-ocr:hover { background: #4338ca; }
         .btn-danger { color: var(--danger); border-color: #fca5a5; }
         .btn-danger:hover { background: var(--danger-light); }
-        .btn-teal { background: var(--teal); color: white; border: none; box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2); }
-        .btn-teal:hover { background: #0f766e; }
 
         /* 全仓一览面板 */
         .global-inv-panel { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: none; animation: fadeIn 0.3s ease; }
@@ -109,7 +107,6 @@
         
         .form-control { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.15); }
-        select.form-control { cursor: pointer; background-color: #fff; }
         
         .plan-group { display: flex; align-items: center; gap: 12px; width: 100%; }
         .slider-wrapper { flex: 1; display: flex; align-items: center; }
@@ -118,7 +115,7 @@
 
         /* 摘要与警告区 */
         .summary-container { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .overshoot-warning { background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; padding: 12px 15px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; display: none; align-items: center; gap: 8px; animation: fadeIn 0.4s; }
+        .overshoot-warning { background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; padding: 12px 15px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; display: none; align-items: center; gap: 8px; }
         
         .plan-summary-text { padding: 15px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; color: #475569; line-height: 1.6; border-left: 4px solid #94a3b8; position: relative;}
         .copy-btn { position: absolute; top: 15px; right: 15px; background: white; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: var(--text-dark); transition: 0.2s;}
@@ -139,8 +136,8 @@
 
 <div class="container">
     <header>
-        <h1>🍊 Capybara Marathon</h1>
-        <div class="subtitle">AI后台分析中，请稍后...</div>
+        <h1>🍊 Capybara Marathon </h1>
+        <div class="subtitle">AI后台超负载分析中，请稍后...</div>
     </header>
     
     <div class="dashboard-grid">
@@ -162,7 +159,6 @@
         </div>
     </div>
 
-    <!-- 顶栏 Tab 容器 -->
     <div class="tabs" id="tabs-container"></div>
 
     <div class="action-banner">
@@ -201,7 +197,6 @@
     <div class="item-list" id="controls-container"></div>
 
     <div class="summary-container">
-        <!-- 溢出警告组件 -->
         <div class="overshoot-warning" id="overshoot-warning">
             ⚠️ 警告：当前方案溢出分数过高！建议在上方手动减去 1 个高分道具，用低分道具填缝防亏损。
         </div>
@@ -226,14 +221,14 @@
     };
 
     const globalItemsRegistry = {
-        tl:  { name: "体力", ratio: 75 }, xd:  { name: "限定/传说", ratio: 3000 },
-        yx:  { name: "英雄补给", ratio: 300 }, mzx: { name: "冒险者补给", ratio: 100 },
-        wk:  { name: "挖矿", ratio: 40 }, py:  { name: "培育", ratio: 15 },
+        tl:  { name: "体力", ratio: 75 }, xd:  { name: "限定/传说秘宝箱", ratio: 3000 },
+        yx:  { name: "英雄补给箱", ratio: 300 }, mzx: { name: "冒险者补给箱", ratio: 100 },
+        wk:  { name: "挖矿", ratio: 40 }, py:  { name: "宠物培育", ratio: 15 },
         bls: { name: "不灵石", ratio: 1750 }, gh:  { name: "公会讨伐", ratio: 3750 },
         cwd: { name: "宠物蛋", ratio: 60 }, fb:  { name: "副本", ratio: 500 },
         bx:  { name: "宝箱", ratio: 48 }, gl:  { name: "咕噜矿场", ratio: 1500 },
-        zb:  { name: "珍宝宝石", ratio: 3000 }, dc:  { name: "地牢", ratio: 3750 },
-        zq:  { name: "坐骑", ratio: 32 }, jjc: { name: "竞技场", ratio: 750 }
+        zb:  { name: "珍宝宝石", ratio: 3000 }, dc:  { name: "挺进地牢", ratio: 3750 },
+        zq:  { name: "坐骑升级", ratio: 32 }, jjc: { name: "竞技场", ratio: 750 }
     };
 
     // --- 状态机 ---
@@ -259,7 +254,6 @@
         }
     }
 
-    // --- 极简 Toast 通知系统 ---
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -271,10 +265,9 @@
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
-        }, 3000);
+        }, 4000);
     }
 
-    // --- UI 交互绑定 ---
     function updateTargetScore(val) {
         state.targetScore = Math.max(1, parseInt(val) || 245000);
         saveState(); calculateScores();
@@ -318,7 +311,6 @@
         } catch(e) { showToast("数据格式有误，请直接粘贴大括号包裹的JSON", "error"); }
     }
 
-    // --- 核心渲染与计算逻辑 ---
     function initTabs() {
         const c = document.getElementById('tabs-container');
         c.innerHTML = '';
@@ -361,7 +353,6 @@
             `;
             c.appendChild(card);
 
-            // 双向绑定
             const bind = (id, fn) => card.querySelector(id).addEventListener('input', fn);
             bind(`#stk-${key}`, e => { state.inventory[key] = Math.max(0, parseInt(e.target.value)||0); saveState(); renderList(); calculateScores(); });
             bind(`#pri-${key}`, e => { state.priorities[key] = parseInt(e.target.value); saveState(); });
@@ -452,21 +443,23 @@
         showToast("🧹 当日规划已清空"); renderList(); calculateScores(); saveState();
     }
 
-    // --- 初始化入口 (新增自动识别今天星期几与平铺) ---
+    // --- 【重大更新】初始化入口：按服务器时间轴对齐 (UTC 0点刷新机制) ---
     window.onload = () => { 
         loadState(); 
         
-        // 自动识别当天星期几 (0代表周日，1-6代表周一到周六)
-        let today = new Date().getDay();
-        if (today === 0) today = 7; // 工具字典中周日对应的Key是7
-        state.currentDay = today; 
+        // 使用原生的 getUTCDay() 抓取零时区星期几，完美解决国内早上 8:00 前(凌晨)仍属于游戏前一天的痛点
+        // 0代表标准零时区的周日，1-6代表周一到周六
+        let serverDay = new Date().getUTCDay();
+        if (serverDay === 0) serverDay = 7; // 工具字典中周日对应的 Key 是 7
+        
+        state.currentDay = serverDay; 
         
         initTabs(); 
         renderList(); 
         calculateScores(); 
         renderGlobalInv(); 
         
-        showToast(`📅 欢迎回来！已自动定位到今天 (${marathonConfig[today].name.split(" ")[0]})`, "info");
+        showToast(`📅 欢迎回来！ ${marathonConfig[serverDay].name.split(" ")[0]}`, "info");
     };
 </script>
 
