@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capybara Go! 卡皮马拉松)</title>
+    <title>Capybara Go! 卡皮马拉松</title>
     <style>
         :root {
             --primary: #ca8a04;
@@ -22,17 +22,20 @@
             --indigo-light: #e0e7ff;
             --teal: #0d9488;
             --teal-light: #ccfbf1;
+            --chest-bronze: #cd7f32;
+            --chest-silver: #94a3b8;
+            --chest-gold: #fbbf24;
+            --chest-pet: #a855f7;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
         body { background-color: var(--bg-main); color: var(--text-dark); padding: 30px 15px; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 950px; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); border: 1px solid var(--border); position: relative;}
+        .container { width: 100%; max-width: 1000px; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); border: 1px solid var(--border); position: relative;}
         
         header { text-align: center; margin-bottom: 25px; }
         h1 { font-size: 1.8rem; color: #854d0e; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .subtitle { font-size: 0.9rem; color: var(--text-muted); margin-top: 5px; }
 
-        /* 看板 */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
         @media (max-width: 600px) { .dashboard-grid { grid-template-columns: 1fr; } }
         
@@ -42,7 +45,6 @@
         .target-title { font-size: 0.85rem; font-weight: bold; color: #713f12; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
         .score-large { font-size: 2.2rem; font-weight: 800; color: #713f12; display: flex; align-items: center; gap: 8px;}
         
-        /* 目标分自定义输入框 */
         .edit-target-input { width: 120px; font-size: 1.8rem; font-weight: 800; color: #713f12; background: transparent; border: none; border-bottom: 2px dashed #ca8a04; outline: none; padding: 0;}
         .edit-icon { font-size: 1rem; cursor: pointer; opacity: 0.6; transition: 0.2s;}
         .edit-icon:hover { opacity: 1; transform: scale(1.1);}
@@ -54,23 +56,16 @@
         .progress-wrapper { background: rgba(0, 0, 0, 0.06); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 12px; }
         .progress-bar { width: 0%; height: 100%; background: var(--danger); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
 
-        /* Tabs 响应式平铺优化 */
         .tabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding-bottom: 10px; margin-bottom: 25px; border-bottom: 2px solid var(--border); }
         .tab-btn { text-align: center; background: #f1f5f9; border: none; padding: 10px 2px; border-radius: 10px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: all 0.2s; font-size: 0.82rem; }
         .tab-btn:hover { background: #e2e8f0; color: var(--text-dark); }
         .tab-btn.active { background: var(--primary); color: #ffffff; box-shadow: 0 4px 12px rgba(202, 138, 4, 0.25); }
-        
-        @media (min-width: 500px) {
-            .tabs { gap: 8px; }
-            .tab-btn { padding: 10px 10px; font-size: 0.95rem; }
-        }
+        @media (min-width: 500px) { .tabs { gap: 8px; } .tab-btn { padding: 10px 10px; font-size: 0.95rem; } }
 
-        /* 工具栏 */
         .action-banner { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn { background: #ffffff; color: var(--text-dark); border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
         .btn:hover { background: #f1f5f9; border-color: #94a3b8; transform: translateY(-1px); }
-        .btn:active { transform: translateY(1px); }
         .btn-primary { background: var(--success); color: white; border: none; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2); }
         .btn-primary:hover { background: #15803d; }
         .btn-ocr { background: var(--indigo); color: white; border: none; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2); }
@@ -78,50 +73,46 @@
         .btn-danger { color: var(--danger); border-color: #fca5a5; }
         .btn-danger:hover { background: var(--danger-light); }
 
-        /* 全仓一览面板 */
-        .global-inv-panel { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: none; animation: fadeIn 0.3s ease; }
+        .global-inv-panel, .ocr-import-panel { background: #f8fafc; border: 1px solid var(--border); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: none; animation: fadeIn 0.3s ease; }
+        .ocr-import-panel { background: var(--indigo-light); border-color: #c7d2fe; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .global-inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
         .inv-badge { background: white; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; text-align: center; font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px;}
         .inv-badge span:first-child { color: var(--text-muted); font-weight: bold; }
         .inv-badge span:last-child { color: var(--primary-hover); font-weight: 900; font-size: 1.1rem; }
-
-        /* 扩展面板 */
-        .ocr-import-panel { background: var(--indigo-light); border: 1px solid #c7d2fe; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: none; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         .ocr-textarea { width: 100%; height: 70px; padding: 10px; border: 1px solid #a5b4fc; border-radius: 8px; font-family: monospace; font-size: 0.85rem; resize: none; margin-bottom: 10px; margin-top: 10px;}
-        
-        /* 列表 */
-        .table-header { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 3fr; padding: 10px 15px; font-size: 0.85rem; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+
+        .table-header { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 3.5fr; padding: 10px 15px; font-size: 0.85rem; font-weight: bold; color: var(--text-muted); border-bottom: 1px solid var(--border); }
         @media (max-width: 768px) { .table-header { display: none; } }
         .item-list { display: flex; flex-direction: column; gap: 12px; }
-        .item-card { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 3fr; align-items: center; background: #ffffff; border: 1px solid var(--border); padding: 15px; border-radius: 12px; gap: 15px; transition: box-shadow 0.2s, border-color 0.2s; }
+        .item-card { display: grid; grid-template-columns: 2fr 1.5fr 1.5fr 3.5fr; align-items: center; background: #ffffff; border: 1px solid var(--border); padding: 15px; border-radius: 12px; gap: 15px; transition: box-shadow 0.2s, border-color 0.2s; }
         .item-card:hover { border-color: #ca8a04; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
         @media (max-width: 768px) { .item-card { grid-template-columns: 1fr; gap: 12px; } }
         .item-meta { display: flex; flex-direction: column; }
-        .item-name { font-weight: 700; font-size: 1.05rem; color: var(--text-dark); }
+        .item-name { font-weight: 700; font-size: 1.05rem; color: var(--text-dark); display: flex; align-items: center; gap: 5px; }
         .item-ratio { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
         
+        .chest-tag { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; font-weight: bold; }
+        .tag-qt { background: var(--chest-bronze); } .tag-by { background: var(--chest-silver); } .tag-hj { background: var(--chest-gold); } .tag-cw { background: var(--chest-pet); }
+
         .input-block { display: flex; align-items: center; gap: 8px; }
         .input-label { font-size: 0.8rem; color: var(--text-muted); display: none; }
-        @media (max-width: 768px) { .input-label { display: inline; width: 70px; } }
+        @media (max-width: 768px) { .input-label { display: inline; width: 50px; } }
         
-        .form-control { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
+        .form-control { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
         .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.15); }
         
-        .plan-group { display: flex; align-items: center; gap: 12px; width: 100%; }
-        .slider-wrapper { flex: 1; display: flex; align-items: center; }
+        .plan-group { display: flex; align-items: center; gap: 12px; width: 100%; flex-wrap: wrap;}
+        .slider-wrapper { flex: 1; display: flex; align-items: center; min-width: 150px; }
         .slider { width: 100%; height: 6px; border-radius: 3px; accent-color: var(--primary); cursor: pointer; }
         .num-box { width: 85px; text-align: center; }
+        .chest-hint { font-size: 0.75rem; color: #059669; font-weight: 600; width: 100%; margin-top: -5px;}
 
-        /* 摘要与警告区 */
         .summary-container { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; }
-        .overshoot-warning { background: #fff1f2; border: 1px solid #fecdd3; color: #be123c; padding: 12px 15px; border-radius: 10px; font-size: 0.9rem; font-weight: bold; display: none; align-items: center; gap: 8px; }
-        
         .plan-summary-text { padding: 15px; background: #f1f5f9; border-radius: 10px; font-size: 0.9rem; color: #475569; line-height: 1.6; border-left: 4px solid #94a3b8; position: relative;}
         .copy-btn { position: absolute; top: 15px; right: 15px; background: white; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: var(--text-dark); transition: 0.2s;}
         .copy-btn:hover { background: #e2e8f0; }
 
-        /* Toast 通知系统 */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { min-width: 250px; background: #334155; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 500; opacity: 0; transform: translateX(100%); transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         .toast.show { opacity: 1; transform: translateX(0); }
@@ -136,13 +127,13 @@
 
 <div class="container">
     <header>
-        <h1>🍊 Capybara Marathon </h1>
-        <div class="subtitle">AI后台超负载分析中，请稍后...</div>
+        <h1>🍊 Capybara Marathon</h1>
+        <div class="subtitle">AI后台分析中，请稍后...</div>
     </header>
     
     <div class="dashboard-grid">
         <div class="panel">
-            <div class="target-title">🎯 今日目标积分 (点击修改)</div>
+            <div class="target-title">🎯 今日目标积分</div>
             <div class="score-large">
                 <input type="number" id="target-input" class="edit-target-input" value="245000" onchange="updateTargetScore(this.value)">
                 <span class="edit-icon" onclick="document.getElementById('target-input').focus()">✏️</span>
@@ -163,8 +154,8 @@
 
     <div class="action-banner">
         <div class="btn-group">
-            <button class="btn btn-ocr" onclick="togglePanel('ocr-panel')">📷 截图导入</button>
-            <button class="btn" onclick="toggleGlobalInv()">📦 全仓一览</button>
+            <button class="btn btn-ocr" onclick="togglePanel('ocr-panel')">📷 截图导入更新</button>
+            <button class="btn" onclick="togglePanel('global-inv-panel'); renderGlobalInv();">📦 全仓一览</button>
         </div>
         <div class="btn-group">
             <button class="btn btn-primary" onclick="optimizeCurrentDay()">🤖 智能一键规划</button>
@@ -172,16 +163,14 @@
         </div>
     </div>
 
-    <!-- 全局库存看板 -->
     <div class="global-inv-panel" id="global-inv-panel">
         <div style="font-weight:bold; color:var(--text-dark); margin-bottom: 5px;">📦 当前全仓资产快照</div>
         <div class="global-inv-grid" id="global-inv-grid"></div>
     </div>
 
-    <!-- 截图导入 -->
     <div class="ocr-import-panel" id="ocr-panel">
-        <div style="font-weight:bold; color:#3730a3;">📷 视觉识别数据秒同步</div>
-        <textarea class="ocr-textarea" id="ocr-input" placeholder='请粘贴 AI 为你生成的库存代码，例如：{"tl":350, "xd":45}'></textarea>
+        <div style="font-weight:bold; color:#3730a3;">📷 粘贴最新的 JSON 数据</div>
+        <textarea class="ocr-textarea" id="ocr-input" placeholder='请粘贴最新的大括号数据串...'></textarea>
         <div style="text-align: right;">
             <button class="btn btn-primary" style="background:var(--indigo);" onclick="applyOcrData()">⚡ 瞬间覆盖同步</button>
         </div>
@@ -191,16 +180,12 @@
         <div>物资类别 (单分)</div>
         <div>当前总库存</div>
         <div>消耗优先级</div>
-        <div>今日消耗规划</div>
+        <div>今日消耗规划 (包含连开指引)</div>
     </div>
 
     <div class="item-list" id="controls-container"></div>
 
     <div class="summary-container">
-        <div class="overshoot-warning" id="overshoot-warning">
-            ⚠️ 警告：当前方案溢出分数过高！建议在上方手动减去 1 个高分道具，用低分道具填缝防亏损。
-        </div>
-
         <div class="plan-summary-text" id="plan-summary">
             <button class="copy-btn" onclick="copyPlan()">📋 复制策略</button>
             <div id="summary-content">暂无分配规划。请调整上方滑动条或点击“智能一键规划”。</div>
@@ -209,80 +194,63 @@
 </div>
 
 <script>
-    // --- 核心数据字典 ---
+    const globalItemsRegistry = {
+        tl:  { name: "体力", ratio: 75 }, xd:  { name: "限定/传说", ratio: 3000 },
+        yx:  { name: "英雄补给箱", ratio: 300 }, mzx: { name: "冒险者补给箱", ratio: 100 },
+        wk:  { name: "挖矿铁锤", ratio: 40 }, py:  { name: "培育(灵石)", ratio: 15 },
+        bls: { name: "不灵石", ratio: 1750 }, gh:  { name: "公会讨伐", ratio: 3750 },
+        cwd: { name: "宠物蛋", ratio: 60 }, fb:  { name: "副本扫荡", ratio: 500 },
+        bx_qt: { name: "青铜宝箱", ratio: 48, tag: "tag-qt", tname: "青铜" }, 
+        bx_by: { name: "白银宝箱", ratio: 480, tag: "tag-by", tname: "白银" },
+        bx_hj: { name: "黄金宝箱", ratio: 960, tag: "tag-hj", tname: "黄金" }, 
+        bx_cw: { name: "宠物宝箱", ratio: 2400, tag: "tag-cw", tname: "宠物" },
+        gl:  { name: "咕噜矿场", ratio: 1500 }, zb:  { name: "珍宝宝石箱", ratio: 3000 },
+        dc:  { name: "挺进地牢", ratio: 3750 }, zq:  { name: "坐骑", ratio: 32 }, jjc: { name: "竞技场", ratio: 750 }
+    };
+
     const marathonConfig = {
         1: { name: "星期一 (装备宝箱)", items: ["tl", "xd", "yx", "mzx"] },
         2: { name: "星期二 (宠物培育)", items: ["wk", "py", "bls"] },
         3: { name: "星期三 (宠物蛋)", items: ["gh", "cwd"] },
-        4: { name: "星期四 (宝箱积分)", items: ["fb", "bx"] },
+        4: { name: "星期四 (宝箱积分)", items: ["fb", "bx_qt", "bx_by", "bx_hj", "bx_cw"] },
         5: { name: "星期五 (宝石宝箱)", items: ["gl", "zb"] },
         6: { name: "星期六 (坐骑培养)", items: ["dc", "zq"] },
-        7: { name: "星期日 (集结冲刺)", items: ["xd", "yx", "mzx", "py", "cwd", "bx", "zb", "zq", "jjc"] }
+        7: { name: "星期日 (集结冲刺)", items: ["xd", "yx", "mzx", "py", "cwd", "bx_qt", "bx_by", "bx_hj", "bx_cw", "zb", "zq", "jjc"] }
     };
 
-    const globalItemsRegistry = {
-        tl:  { name: "体力", ratio: 75 }, xd:  { name: "限定/传说秘宝箱", ratio: 3000 },
-        yx:  { name: "英雄补给箱", ratio: 300 }, mzx: { name: "冒险者补给箱", ratio: 100 },
-        wk:  { name: "挖矿", ratio: 40 }, py:  { name: "宠物培育", ratio: 15 },
-        bls: { name: "不灵石", ratio: 1750 }, gh:  { name: "公会讨伐", ratio: 3750 },
-        cwd: { name: "宠物蛋", ratio: 60 }, fb:  { name: "副本", ratio: 500 },
-        bx:  { name: "宝箱", ratio: 48 }, gl:  { name: "咕噜矿场", ratio: 1500 },
-        zb:  { name: "珍宝宝石", ratio: 3000 }, dc:  { name: "挺进地牢", ratio: 3750 },
-        zq:  { name: "坐骑升级", ratio: 32 }, jjc: { name: "竞技场", ratio: 750 }
-    };
-
-    // --- 状态机 ---
     let state = {
         targetScore: 245000,
         currentDay: 1,
-        inventory: { tl: 0, xd: 0, yx: 0, mzx: 0, wk: 0, py: 0, bls: 0, gh: 0, cwd: 0, fb: 0, bx: 0, gl: 0, zb: 0, dc: 0, zq: 0, jjc: 0 },
-        priorities: { tl: 1, xd: 4, yx: 2, mzx: 1, wk: 1, py: 2, bls: 3, gh: 2, cwd: 2, fb: 1, bx: 2, gl: 2, zb: 4, dc: 2, zq: 3, jjc: 1 },
+        // 修正：宝箱默认库存全部归零
+        inventory: { tl: 1154, xd: 46, yx: 40, mzx: 14, wk: 100, py: 13500, bls: 7, gh: 2, cwd: 6426, fb: 16, bx_qt: 0, bx_by: 0, bx_hj: 0, bx_cw: 0, gl: 7, zb: 13, dc: 5, zq: 18200, jjc: 5 },
+        priorities: { tl: 1, xd: 4, yx: 2, mzx: 1, wk: 1, py: 2, bls: 3, gh: 1, cwd: 2, fb: 1, bx_qt: 2, bx_by: 2, bx_hj: 3, bx_cw: 4, gl: 1, zb: 4, dc: 1, zq: 3, jjc: 1 },
         plans: { 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {} }
     };
 
-    const STORAGE_KEY = 'CAPYBARA_MARATHON_V4';
+    // 升级 Key，避免读取旧的含有幽灵宝箱数据的缓存
+    const STORAGE_KEY = 'CAPYBARA_MARATHON_V4_4';
     
-    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); renderGlobalInv(); }
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
     function loadState() {
         const cache = localStorage.getItem(STORAGE_KEY);
         if (cache) {
-            try {
-                const p = JSON.parse(cache);
-                if(p.inventory) state = {...state, ...p};
-                document.getElementById('target-input').value = state.targetScore;
-            } catch(e) { console.error(e); }
+            try { const p = JSON.parse(cache); if(p.inventory) state = {...state, ...p}; } catch(e) {}
         }
+        document.getElementById('target-input').value = state.targetScore;
     }
 
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        let icon = type === 'success' ? '✅' : (type === 'error' ? '❌' : 'ℹ️');
         toast.className = `toast toast-${type}`;
-        toast.innerHTML = `<span>${icon}</span> <span>${msg}</span>`;
+        toast.innerHTML = `<span>${type === 'success' ? '✅' : 'ℹ️'}</span> <span>${msg}</span>`;
         container.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 10);
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 300);
-        }, 4000);
+        setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
     }
 
-    function updateTargetScore(val) {
-        state.targetScore = Math.max(1, parseInt(val) || 245000);
-        saveState(); calculateScores();
-        showToast(`🎯 目标已更新为：${state.targetScore.toLocaleString()} 分`, 'info');
-    }
-
-    function togglePanel(id) {
-        const el = document.getElementById(id);
-        el.style.display = el.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function toggleGlobalInv() {
-        togglePanel('global-inv-panel');
-        renderGlobalInv();
-    }
+    function updateTargetScore(val) { state.targetScore = Math.max(1, parseInt(val) || 245000); saveState(); calculateScores(); }
+    function togglePanel(id) { const el = document.getElementById(id); el.style.display = el.style.display === 'block' ? 'none' : 'block'; }
 
     function renderGlobalInv() {
         const grid = document.getElementById('global-inv-grid');
@@ -295,7 +263,6 @@
 
     function applyOcrData() {
         const rawText = document.getElementById('ocr-input').value.trim();
-        if(!rawText) return showToast("请输入数据串！", "error");
         try {
             const parsed = JSON.parse(rawText);
             let count = 0;
@@ -304,10 +271,9 @@
             });
             if(count > 0) {
                 showToast(`⚡ 成功秒传 ${count} 项最新库存！`);
-                document.getElementById('ocr-input').value = '';
-                document.getElementById('ocr-panel').style.display = 'none';
+                document.getElementById('ocr-input').value = ''; togglePanel('ocr-panel');
                 saveState(); renderList(); calculateScores();
-            } else { showToast("未识别到有效的物品代码", "error"); }
+            }
         } catch(e) { showToast("数据格式有误，请直接粘贴大括号包裹的JSON", "error"); }
     }
 
@@ -324,6 +290,46 @@
         document.getElementById('day-title').innerText = `📅 ${marathonConfig[state.currentDay].name}`;
     }
 
+    // 🌟 V4.4 核心升级：真实模拟游戏内的库存消失机制
+    function getChestClickGuide(qtyToOpen, initialStock) {
+        if(qtyToOpen <= 0) return "";
+        
+        let clicks50 = 0;
+        let clicks10 = 0;
+        let clicks1 = 0;
+
+        let remQty = qtyToOpen;
+        let curStock = initialStock;
+
+        // 模拟玩家在游戏里一次次点击消耗的过程
+        while (remQty > 0) {
+            // 只要当前库存 >= 100，并且你需要开的数量 >= 50，游戏就会出现 x50 按钮
+            if (curStock >= 100 && remQty >= 50) {
+                clicks50++;
+                curStock -= 50;
+                remQty -= 50;
+            } 
+            // 当库存掉到 100 以下（或剩余要开的不够 50 时），按钮变成 x10
+            else if (curStock >= 10 && remQty >= 10) {
+                clicks10++;
+                curStock -= 10;
+                remQty -= 10;
+            } 
+            // 零头补充
+            else {
+                clicks1++;
+                curStock -= 1;
+                remQty -= 1;
+            }
+        }
+
+        let steps = [];
+        if(clicks50 > 0) steps.push(`50连开x${clicks50}`);
+        if(clicks10 > 0) steps.push(`10连开x${clicks10}`);
+        if(clicks1 > 0) steps.push(`单抽x${clicks1}`);
+        return `🕹️ 游戏内点击：${steps.join(', ')}`;
+    }
+
     function renderList() {
         const c = document.getElementById('controls-container');
         c.innerHTML = '';
@@ -334,10 +340,19 @@
             if (state.plans[state.currentDay][key] === undefined) state.plans[state.currentDay][key] = 0;
             let planVal = Math.min(state.plans[state.currentDay][key], stock);
             
+            const isChest = key.startsWith('bx_');
+            const nameTag = isChest ? `<span class="chest-tag ${meta.tag}">${meta.tname}</span> ` : '';
+            
+            let inputStep = 1;
+            if (isChest && stock >= 10) inputStep = 10; 
+
             const card = document.createElement('div');
             card.className = 'item-card';
             card.innerHTML = `
-                <div class="item-meta"><span class="item-name">${meta.name}</span><span class="item-ratio">分值: +${meta.ratio}</span></div>
+                <div class="item-meta">
+                    <span class="item-name">${nameTag}${meta.name}</span>
+                    <span class="item-ratio">分值: +${meta.ratio}</span>
+                </div>
                 <div class="input-block"><span class="input-label">库存</span><input type="number" class="form-control" value="${stock}" id="stk-${key}"></div>
                 <div class="input-block"><span class="input-label">权重</span>
                     <select class="form-control" id="pri-${key}">
@@ -347,8 +362,9 @@
                     </select>
                 </div>
                 <div class="plan-group">
-                    <input type="range" class="slider" min="0" max="${stock}" value="${planVal}" id="sld-${key}">
-                    <input type="number" class="form-control num-box" min="0" max="${stock}" value="${planVal}" id="num-${key}">
+                    <div class="slider-wrapper"><input type="range" class="slider" min="0" max="${stock}" step="${inputStep}" value="${planVal}" id="sld-${key}"></div>
+                    <input type="number" class="form-control num-box" step="${inputStep}" min="0" max="${stock}" value="${planVal}" id="num-${key}">
+                    ${isChest ? `<div class="chest-hint" id="hint-${key}">${getChestClickGuide(planVal, stock)}</div>` : ''}
                 </div>
             `;
             c.appendChild(card);
@@ -356,9 +372,14 @@
             const bind = (id, fn) => card.querySelector(id).addEventListener('input', fn);
             bind(`#stk-${key}`, e => { state.inventory[key] = Math.max(0, parseInt(e.target.value)||0); saveState(); renderList(); calculateScores(); });
             bind(`#pri-${key}`, e => { state.priorities[key] = parseInt(e.target.value); saveState(); });
+            
             const syncPlan = val => { 
                 let v = Math.min(Math.max(0, parseInt(val)||0), state.inventory[key]); 
-                state.plans[state.currentDay][key] = v; card.querySelector(`#sld-${key}`).value = v; card.querySelector(`#num-${key}`).value = v;
+                state.plans[state.currentDay][key] = v; 
+                card.querySelector(`#sld-${key}`).value = v; 
+                card.querySelector(`#num-${key}`).value = v;
+                // 实时将当前库存量传给向导函数，计算最真实的开箱路径
+                if(isChest) card.querySelector(`#hint-${key}`).innerText = getChestClickGuide(v, state.inventory[key]);
                 saveState(); calculateScores();
             };
             bind(`#sld-${key}`, e => syncPlan(e.target.value));
@@ -376,33 +397,40 @@
 
         for (let item of pool) {
             if (rem <= 0 || item.p === 5) continue;
-            let maxPts = item.s * item.r;
-            if (maxPts <= rem) {
-                state.plans[state.currentDay][item.k] = item.s; rem -= maxPts;
-            } else {
-                let exact = Math.ceil(rem / item.r);
-                state.plans[state.currentDay][item.k] = exact; rem -= exact * item.r;
+            let exact = Math.ceil(rem / item.r);
+            let allocated = Math.min(exact, item.s);
+            
+            if (item.k.startsWith('bx_') && item.s >= 10) {
+                let rounded = Math.ceil(allocated / 10) * 10;
+                allocated = rounded > item.s ? Math.floor(item.s / 10) * 10 : rounded;
             }
+
+            state.plans[state.currentDay][item.k] = allocated;
+            rem -= allocated * item.r;
         }
-        showToast("🤖 智能规划完毕！", "success");
+        showToast("🤖 智能规划完毕！已完美规整宝箱开启次数。");
         renderList(); calculateScores(); saveState();
     }
 
     let currentSummaryText = "";
 
     function calculateScores() {
-        let total = 0, details = [];
+        let total = 0, details = [], copyLines = [];
         marathonConfig[state.currentDay].items.forEach(k => {
             const qty = state.plans[state.currentDay][k] || 0;
+            const stock = state.inventory[k] || 0;
             if (qty > 0) {
                 const pts = qty * globalItemsRegistry[k].ratio; total += pts;
-                details.push(`【${globalItemsRegistry[k].name}】x${qty} `);
+                let isChest = k.startsWith('bx_');
+                // 传入动态库存判定
+                let actStr = isChest ? ` ${getChestClickGuide(qty, stock).replace('🕹️ 游戏内点击：','')}` : '';
+                details.push(`【${globalItemsRegistry[k].name}】x${qty}${isChest ? `<br><small style="color:#059669; padding-left:10px">${getChestClickGuide(qty, stock)}</small>` : ''}`);
+                copyLines.push(`${globalItemsRegistry[k].name}: ${qty}个${actStr}`);
             }
         });
 
         document.getElementById('total-score').innerText = total.toLocaleString();
         const bar = document.getElementById('progress-bar'), msg = document.getElementById('status-msg');
-        
         bar.style.width = Math.min((total / state.targetScore) * 100, 100) + '%';
         if (total >= state.targetScore) {
             bar.style.backgroundColor = 'var(--success)';
@@ -414,18 +442,10 @@
             msg.innerText = `⏳ 差 ${(state.targetScore - total).toLocaleString()} 分`;
         }
 
-        const warn = document.getElementById('overshoot-warning');
-        if (total - state.targetScore > 1500) {
-            warn.style.display = 'flex';
-            warn.innerHTML = `⚠️ <b>警告：溢出 ${(total - state.targetScore).toLocaleString()} 分，亏损严重！</b>建议在上方减去1个高分道具(如限定/宝石)，用低分道具(如培育)精细填缝。`;
-        } else { warn.style.display = 'none'; }
-
         const sumDiv = document.getElementById('summary-content');
         if(details.length > 0) {
-            currentSummaryText = `[卡皮马拉松 ${marathonConfig[state.currentDay].name.split(" ")[0]} 策略]
-目标: ${state.targetScore/1000}K | 预估: ${total.toLocaleString()}分
-消耗: ${details.join(', ')}`;
-            sumDiv.innerHTML = `<b>📊 消耗流水：</b><br>${details.join(' , ')}<br><br><b>🎯 预估达成：</b>${total.toLocaleString()} 分 (目标 ${state.targetScore.toLocaleString()})`;
+            currentSummaryText = `[卡皮马拉松 ${marathonConfig[state.currentDay].name.split(" ")[0]} 策略]\n目标: ${state.targetScore/1000}K | 预估: ${total.toLocaleString()}分\n执行流水:\n${copyLines.join('\n')}`;
+            sumDiv.innerHTML = `<b>📊 消耗流水：</b><br>${details.join('<br>')}<br><br><b>🎯 预估达成：</b>${total.toLocaleString()} 分 (目标 ${state.targetScore.toLocaleString()})`;
         } else {
             currentSummaryText = ""; sumDiv.innerHTML = "暂无规划，请调节滑动条或一键排布。";
         }
@@ -433,9 +453,7 @@
 
     function copyPlan() {
         if(!currentSummaryText) return showToast("当前无策略可复制", "error");
-        navigator.clipboard.writeText(currentSummaryText).then(() => {
-            showToast("📋 策略已复制到剪贴板！去群里装杯吧~");
-        });
+        navigator.clipboard.writeText(currentSummaryText).then(() => showToast("📋 策略及连开指引已复制！"));
     }
 
     function clearCurrentPlan() {
@@ -443,25 +461,13 @@
         showToast("🧹 当日规划已清空"); renderList(); calculateScores(); saveState();
     }
 
-    // --- 【重大更新】初始化入口：按服务器时间轴对齐 (UTC 0点刷新机制) ---
     window.onload = () => { 
         loadState(); 
-        
-        // 使用原生的 getUTCDay() 抓取零时区星期几，完美解决国内早上 8:00 前(凌晨)仍属于游戏前一天的痛点
-        // 0代表标准零时区的周日，1-6代表周一到周六
         let serverDay = new Date().getUTCDay();
-        if (serverDay === 0) serverDay = 7; // 工具字典中周日对应的 Key 是 7
-        
+        if (serverDay === 0) serverDay = 7;
         state.currentDay = serverDay; 
-        
-        initTabs(); 
-        renderList(); 
-        calculateScores(); 
-        renderGlobalInv(); 
-        
-        showToast(`📅 欢迎回来！ ${marathonConfig[serverDay].name.split(" ")[0]}`, "info");
+        initTabs(); renderList(); calculateScores(); 
     };
 </script>
-
 </body>
 </html>
