@@ -1,1 +1,209 @@
+/* css/style.css */
+:root {
+    --primary: #4f46e5;
+    --primary-light: #eef2ff;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+}
 
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    -webkit-tap-highlight-color: transparent; /* 消除iOS点击高亮阴影 */
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-dark);
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 顶部标题区 */
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+    padding: 8px 0;
+}
+.header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    letter-spacing: -0.5px;
+}
+
+/* 策略输出大卡片 */
+.dashboard-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    margin-bottom: 16px;
+    border: 1px solid var(--border-color);
+}
+.dashboard-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+.strategy-output {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+.strategy-details {
+    color: #475569;
+    font-size: 13.5px;
+    line-height: 1.6;
+}
+
+/* 双模式切换按钮（用纯 Block/Table 实现，防止 iOS 布局错位） */
+.mode-container {
+    display: table;
+    width: 100%;
+    background: #e2e8f0;
+    border-radius: 10px;
+    padding: 2px;
+    margin-bottom: 16px;
+}
+.mode-btn {
+    display: table-cell;
+    text-align: center;
+    padding: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.mode-btn.active {
+    background: var(--card-bg);
+    color: var(--text-dark);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+/* 上传区域 */
+.upload-zone {
+    border: 2px dashed #cbd5e1;
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 16px;
+    position: relative;
+    transition: border-color 0.2s ease;
+}
+.upload-zone:active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+.upload-zone input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.upload-tip {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 14px;
+}
+.upload-subtip {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+/* 手风琴隐藏式面板 */
+.accordion-header {
+    background: #edf2f7;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: block;
+    position: relative;
+    margin-bottom: 4px;
+}
+.accordion-arrow {
+    position: absolute;
+    right: 16px;
+    top: 14px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+.accordion-content {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: none;
+    margin-bottom: 16px;
+}
+.accordion-content.show {
+    display: block;
+}
+
+/* 表单输入网格优化：单行平铺，防止失焦 */
+.input-group-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 12px 0 6px 0;
+    padding-bottom: 4px;
+    border-bottom: 1px dashed var(--border-color);
+}
+.input-item {
+    display: block;
+    margin-bottom: 10px;
+}
+.input-item label {
+    display: inline-block;
+    width: 45%;
+    font-size: 13px;
+    color: #475569;
+    vertical-align: middle;
+}
+.input-item input {
+    display: inline-block;
+    width: 53%;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px; /* iOS上大于等于15px可以防止点击输入框时系统自动放大页面 */
+    outline: none;
+    vertical-align: middle;
+    text-align: right;
+}
+.input-item input:focus {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+/* 系统状态日志查看器 */
+.status-log {
+    font-family: Menlo, Monaco, Consolas, monospace;
+    background: #0f172a;
+    color: #38bdf8;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin-top: 16px;
+    max-height: 120px;
+    overflow-y: auto;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
