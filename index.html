@@ -2,53 +2,302 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卡皮巴拉自动化</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>卡皮巴拉自动化规划助手 (OCR终极版)</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://docs.opencv.org/4.x/opencv.js" async defer onload="onOpenCvReady();"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <style>
+        /* 额外补充的切图辅助区样式 */
+        .debug-box { background: #fee2e2; border: 1px dashed #ef4444; padding: 12px; border-radius: 10px; margin-top: 16px; display: none; }
+        .debug-canvas { width: 100%; max-width: 400px; border: 1px solid #cbd5e1; margin-top: 8px; border-radius: 6px; }
+    </style>
 </head>
 <body>
-    <div class="status-log" id="status-log">初始化加载中...</div>
-    <input type="file" id="image-loader" accept="image/*" multiple onchange="handleImageUpload(event)">
-    <div class="debug-box" id="debug-box"><canvas id="canvas-normalized"></canvas></div>
+
+    <div class="header">
+        <h1>卡皮巴拉一键自动规划器</h1>
+        <div style="font-size: 11px; color:#64748b; margin-top:4px;">iOS / iPadOS OpenCV 纯前端像素雷达已激活</div>
+    </div>
+
+    <div class="mode-container">
+        <div class="mode-btn active" id="btn-ai" onclick="setMode('ai')">AI 智能规划</div>
+        <div class="mode-btn" id="btn-custom" onclick="setMode('custom')">自定义优先</div>
+    </div>
+
+    <div class="dashboard-card">
+        <div class="dashboard-title">👑 今日推荐最优行动方案</div>
+        <div class="strategy-output" id="plan-headline">等待数据导入...</div>
+        <div class="strategy-details" id="plan-details">
+            请在下方一键上传游戏截图。系统已激活全设备归一化与 Tesseract OCR 引擎，将自动提取 13 项变动物资数量。
+        </div>
+    </div>
+
+    <div class="upload-zone">
+        <div class="upload-tip">📸 点击这里选择相册截图</div>
+        <div class="upload-subtip">支持 Safari，纯本地运算，绝对安全不封号</div>
+        <input type="file" id="image-loader" accept="image/*" multiple onchange="handleImageUpload(event)">
+    </div>
+
+    <div class="accordion-header" onclick="toggleAccordion()">
+        <span>📦 查看 / 手动微调资产库存</span>
+        <span class="accordion-arrow" id="accordion-arrow">▼</span>
+    </div>
+    
+    <div class="accordion-content" id="inventory-panel">
+        <div class="input-group-title">⚡ 基础消耗 & 补给箱</div>
+        <div class="input-item"><label>体力 (tl)</label><input type="number" id="input_tl" value="0" oninput="updateItemData('tl', this.value)"></div>
+        <div class="input-item"><label>限定/传说 (xd)</label><input type="number" id="input_xd" value="0" oninput="updateItemData('xd', this.value)"></div>
+        <div class="input-item"><label>英雄补给箱 (yx)</label><input type="number" id="input_yx" value="0" oninput="updateItemData('yx', this.value)"></div>
+        <div class="input-item"><label>冒险者补给箱 (mzx)</label><input type="number" id="input_mzx" value="0" oninput="updateItemData('mzx', this.value)"></div>
+
+        <div class="input-group-title">🎁 宝箱系列</div>
+        <div class="input-item"><label>青铜宝箱 (bx_qt)</label><input type="number" id="input_bx_qt" value="0" oninput="updateItemData('bx_qt', this.value)"></div>
+        <div class="input-item"><label>白银宝箱 (bx_by)</label><input type="number" id="input_bx_by" value="0" oninput="updateItemData('bx_by', this.value)"></div>
+        <div class="input-item"><label>黄金宝箱 (bx_hj)</label><input type="number" id="input_bx_hj" value="0" oninput="updateItemData('bx_hj', this.value)"></div>
+        <div class="input-item"><label>宠物宝箱 (bx_cw)</label><input type="number" id="input_bx_cw" value="0" oninput="updateItemData('bx_cw', this.value)"></div>
+        <div class="input-item"><label>珍宝宝石箱 (zb)</label><input type="number" id="input_zb" value="0" oninput="updateItemData('zb', this.value)"></div>
+
+        <div class="input-group-title">💎 培育与核心资源</div>
+        <div class="input-item"><label>培育(灵石) (py)</label><input type="number" id="input_py" value="0" oninput="updateItemData('py', this.value)"></div>
+        <div class="input-item"><label>不灵石 (bls)</label><input type="number" id="input_bls" value="0" oninput="updateItemData('bls', this.value)"></div>
+        <div class="input-item"><label>宠物蛋 (cwd)</label><input type="number" id="input_cwd" value="0" oninput="updateItemData('cwd', this.value)"></div>
+        <div class="input-item"><label>坐骑 (zq)</label><input type="number" id="input_zq" value="0" oninput="updateItemData('zq', this.value)"></div>
+
+        <div class="input-group-title">⚙️ 自带默认次数 (免识别)</div>
+        <div class="input-item"><label>挖矿铁锤 (wk)</label><input type="number" id="input_wk" value="100" oninput="updateItemData('wk', this.value)"></div>
+        <div class="input-item"><label>副本扫荡 (fb)</label><input type="number" id="input_fb" value="8" oninput="updateItemData('fb', this.value)"></div>
+        <div class="input-item"><label>咕噜矿场 (gl)</label><input type="number" id="input_gl" value="7" oninput="updateItemData('gl', this.value)"></div>
+        <div class="input-item"><label>竞技场 (jjc)</label><input type="number" id="input_jjc" value="5" oninput="updateItemData('jjc', this.value)"></div>
+        <div class="input-item"><label>挺进地牢 (dc)</label><input type="number" id="input_dc" value="3" oninput="updateItemData('dc', this.value)"></div>
+        <div class="input-item"><label>公会讨伐 (gh)</label><input type="number" id="input_gh" value="2" oninput="updateItemData('gh', this.value)"></div>
+    </div>
+
+    <div class="status-log" id="status-log">正在初始化本地跨端算力内核...</div>
+
+    <div class="debug-box" id="debug-box">
+        <p style="font-weight:700; font-size:12px; color:#b91c1c;">🔧 跨端切图助手：已将截图归一化为 1200 像素宽</p>
+        <p style="font-size:11px; color:#4b5563; margin-top:2px;">长按或右键下方图片保存到电脑。请确保你 assets/items 里的 13 个模板图是从这张大图上抠下来的无数字图标，以保证 100% 匹配成功！</p>
+        <canvas id="canvas-normalized" class="debug-canvas"></canvas>
+    </div>
 
     <script>
-        // 1. 预定义核心变量
-        let cvReady = false;
+        let gameState = {
+            "tl": 0, "xd": 0, "yx": 0, "mzx": 0, "py": 0, 
+            "bls": 0, "cwd": 0, "bx_qt": 0, "bx_by": 0, "bx_hj": 0, 
+            "bx_cw": 0, "zb": 0, "zq": 0, 
+            "wk": 100, "fb": 8, "gl": 7, "jjc": 5, "dc": 3, "gh": 2,
+            "mode": "ai"
+        };
 
-        // 2. 日志系统（确保即使 logger 还没生成也能缓存信息）
+        // 定义要扫描的 13 项物资及其数字所在的位置类型
+        const itemsConfig = [
+            { id: 'tl', file: 'icon_tl.png', type: 'topbar' }, // 体力在顶部，数字在右边
+            { id: 'xd', file: 'icon_xd.png', type: 'grid' },   // 背包格子，数字在右下角
+            { id: 'yx', file: 'icon_yx.png', type: 'grid' },
+            { id: 'mzx', file: 'icon_mzx.png', type: 'grid' },
+            { id: 'py', file: 'icon_py.png', type: 'grid' },
+            { id: 'bls', file: 'icon_bls.png', type: 'grid' },
+            { id: 'cwd', file: 'icon_cwd.png', type: 'grid' },
+            { id: 'bx_qt', file: 'icon_bx_qt.png', type: 'grid' },
+            { id: 'bx_by', file: 'icon_bx_by.png', type: 'grid' },
+            { id: 'bx_hj', file: 'icon_bx_hj.png', type: 'grid' },
+            { id: 'bx_cw', file: 'icon_bx_cw.png', type: 'grid' },
+            { id: 'zb', file: 'icon_zb.png', type: 'grid' },
+            { id: 'zq', file: 'icon_zq.png', type: 'grid' }
+        ];
+
         function log(msg) {
-            console.log(msg);
             const logger = document.getElementById('status-log');
-            if (logger) {
-                logger.innerText += "\n> " + msg;
-                logger.scrollTop = logger.scrollHeight;
-            }
+            logger.innerText += "\n> " + msg;
+            logger.scrollTop = logger.scrollHeight;
         }
 
-        // 3. 核心加载检测
         function onOpenCvReady() {
-            cvReady = true;
-            log("✅ OpenCV 算力内核已就绪");
+            log("OpenCV.js 跨端归一化引擎就绪。");
         }
 
-        // 4. 你的 handleImageUpload 函数（放入刚才的强制检查逻辑）
+        function updateItemData(key, value) {
+            gameState[key] = parseInt(value) || 0;
+            executePlanningEngine();
+        }
+
+        function setMode(selectedMode) {
+            gameState.mode = selectedMode;
+            document.getElementById('btn-ai').classList.toggle('active', selectedMode === 'ai');
+            document.getElementById('btn-custom').classList.toggle('active', selectedMode === 'custom');
+            executePlanningEngine();
+        }
+
+        function toggleAccordion() {
+            const panel = document.getElementById('inventory-panel');
+            const arrow = document.getElementById('accordion-arrow');
+            panel.classList.toggle('show');
+            arrow.innerText = panel.classList.contains('show') ? "▲" : "▼";
+        }
+
+        function executePlanningEngine() {
+            const headline = document.getElementById('plan-headline');
+            const details = document.getElementById('plan-details');
+
+            if (gameState.mode === 'ai') {
+                if (gameState.bx_qt >= 50 && gameState.tl >= 1000) {
+                    headline.innerText = "🔥 建议执行日常爆发连开策略";
+                    details.innerHTML = `AI 检测到青铜宝箱 (<b>${gameState.bx_qt}</b>) 与体力 (<b>${gameState.tl}</b>) 充足。推荐开启 50 个青铜箱，默认固定项正常清空。`;
+                } else {
+                    headline.innerText = "💤 处于日常稳健蓄力阶段";
+                    details.innerHTML = "资源未达爆发线。AI 建议：正常清空 6 项固定次数任务，保留宝箱冲榜。";
+                }
+            } else {
+                headline.innerText = "🛠️ 自定义策略平铺消耗中";
+                details.innerHTML = `遵循自定义线性消耗。体力 <b>${gameState.tl}</b> ｜ 不灵石 <b>${gameState.bls}</b>。`;
+            }
+        }
+
+        // =======================================================
+        // 核心：纯前端 OpenCV 模板匹配 + 局部二值化 OCR 引擎
+        // =======================================================
+
+        // 辅助函数：安全加载单张模板图（解决 Safari 跨域拦截画布的核心）
+        function loadTemplateImage(srcUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous"; // 必须开启匿名跨域
+                img.src = srcUrl;
+                img.onload = () => resolve(img);
+                img.onerror = (e) => reject(new Error(`加载失败: ${srcUrl}`));
+            });
+        }
+
         async function handleImageUpload(event) {
-            if (!cvReady) {
-                log("⏳ 内核正在热启动，请等待...");
-                await new Promise(r => setTimeout(r, 1000));
+            const files = event.target.files;
+            if (!files.length) return;
+
+            log(`🚀 收到上传图像，正在启动 1200px 归一化重构...`);
+            document.getElementById('plan-headline').innerText = "核心正在计算中...";
+
+            for (let file of files) {
+                const imgUrl = URL.createObjectURL(file);
+                const imgElement = new Image();
+                imgElement.src = imgUrl;
+                
+                imgElement.onload = async function() {
+                    try {
+                        // 1. 读取原始图像并进行 1200px 宽度归一化
+                        let rawSrc = cv.imread(imgElement);
+                        let targetWidth = 1200;
+                        let scaleFactor = targetWidth / rawSrc.cols;
+                        let targetHeight = Math.round(rawSrc.rows * scaleFactor);
+                        
+                        let src = new cv.Mat();
+                        let dsize = new cv.Size(targetWidth, targetHeight);
+                        cv.resize(rawSrc, src, dsize, 0, 0, cv.INTER_AREA);
+                        rawSrc.delete(); // 释放原图
+
+                        // 显示归一化大图供切图辅助
+                        document.getElementById('debug-box').style.display = 'block';
+                        cv.imshow('canvas-normalized', src);
+                        log(`📊 图像已锁定至 1200x${targetHeight} 像素。开启 13 项物资轮询雷达...`);
+
+                        // 适配本地开发环境或 GitHub Pages 动态路径
+                        const repoPath = window.location.pathname.includes('capybara-marathon') ? '/capybara-marathon/' : '/';
+
+                        // 2. 循环处理 13 项物资
+                        for (let item of itemsConfig) {
+                            try {
+                                const templateUrl = `${window.location.origin}${repoPath}assets/items/${item.file}`;
+                                let templImgElement = await loadTemplateImage(templateUrl);
+                                let templ = cv.imread(templImgElement);
+
+                                // 模板匹配
+                                let dst = new cv.Mat();
+                                let mask = new cv.Mat();
+                                cv.matchTemplate(src, templ, dst, cv.TM_CCOEFF_NORMED, mask);
+                                
+                                let result = cv.minMaxLoc(dst, mask);
+                                let maxVal = result.maxVal;
+                                let maxLoc = result.maxLoc;
+
+                                // 设定置信度阈值 (0.75+ 通常代表匹配成功)
+                                if (maxVal > 0.75) {
+                                    log(`🎯 锁定 [${item.id}] (相似度 ${(maxVal * 100).toFixed(1)}%)，正在提取数值...`);
+
+                                    // 3. 【局部 ROI 切片】根据物品类型动态切出数字区域
+                                    let roiRect;
+                                    if (item.type === 'topbar') {
+                                        // 顶部栏：数字在图标右侧 (保护边界防止越界)
+                                        let roiWidth = Math.min(150, src.cols - (maxLoc.x + templ.cols - 5));
+                                        roiRect = new cv.Rect(maxLoc.x + templ.cols - 5, maxLoc.y, roiWidth, templ.rows);
+                                    } else {
+                                        // 背包格子：数字在图标偏中下/右下位置
+                                        let roiY = maxLoc.y + templ.rows * 0.4;
+                                        let roiHeight = Math.min(templ.rows * 0.8, src.rows - roiY);
+                                        let roiWidth = Math.min(templ.cols + 20, src.cols - maxLoc.x);
+                                        roiRect = new cv.Rect(maxLoc.x, roiY, roiWidth, roiHeight);
+                                    }
+
+                                    let roi = src.roi(roiRect);
+
+                                    // 4. 【高精度图像预处理】转灰度 + 反向二值化 (白底黑字)
+                                    cv.cvtColor(roi, roi, cv.COLOR_RGBA2GRAY, 0);
+                                    cv.threshold(roi, roi, 160, 255, cv.THRESH_BINARY_INV); 
+
+                                    // 投射到隐形 Canvas 喂给 OCR
+                                    let ocrCanvas = document.createElement('canvas');
+                                    cv.imshow(ocrCanvas, roi);
+
+                                    // 5. OCR 识别，仅允许数字和斜杠
+                                    const ocrResult = await Tesseract.recognize(ocrCanvas, 'eng', {
+                                        tessedit_char_whitelist: '0123456789/' 
+                                    });
+
+                                    let rawText = ocrResult.data.text.trim();
+                                    let parsedNumber = 0;
+
+                                    if (item.type === 'topbar') {
+                                        // 处理 "1618/60" 这种情况，只取斜杠前的数字
+                                        parsedNumber = parseInt(rawText.split('/')[0].replace(/[^0-9]/g, ''));
+                                    } else {
+                                        // 处理纯数字
+                                        parsedNumber = parseInt(rawText.replace(/[^0-9]/g, ''));
+                                    }
+                                    
+                                    if (!isNaN(parsedNumber) && parsedNumber > 0) {
+                                        gameState[item.id] = parsedNumber;
+                                        document.getElementById('input_' + item.id).value = gameState[item.id];
+                                        log(`✅ 成功读取 [${item.id}] 数量: ${parsedNumber}`);
+                                    } else {
+                                        log(`⚠️ [${item.id}] OCR 解析为空。可能被遮挡或边界不准。`);
+                                    }
+
+                                    roi.delete();
+                                } else {
+                                    log(`⏭️ 截图中未发现 [${item.id}]，自动跳过。`);
+                                }
+
+                                templ.delete();
+                                dst.delete();
+                                mask.delete();
+
+                            } catch (e) {
+                                log(`❌ 扫描 [${item.id}] 异常或缺少模板图: ${item.file}`);
+                            }
+                        }
+
+                        // 彻底释放原图大矩阵内存，防止 iOS Safari 崩溃
+                        src.delete();
+
+                        // 更新完毕，触发运算规划
+                        executePlanningEngine();
+                        log(`🎉 全量识别流程结束！`);
+
+                    } catch (err) {
+                        log(`🚨 运行期致命异常: ${err.message}`);
+                        console.error(err);
+                    }
+                };
             }
-            if (!cvReady) {
-                log("❌ 初始化超时，请检查 CDN 链接是否被拦截。");
-                return;
-            }
-            
-            // 下面放入你原本的完整图像处理逻辑...
-            log("开始处理图像...");
-            // (此处保持你原本的图像处理代码)
         }
     </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv.js/4.8.0/opencv.js" onload="onOpenCvReady();"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </body>
 </html>
