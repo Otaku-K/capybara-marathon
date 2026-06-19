@@ -2,56 +2,53 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>卡皮巴拉自动化规划助手 (OCR终极版)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡皮巴拉自动化</title>
     <link rel="stylesheet" href="css/style.css">
-    
-    <style>
-        /* 额外补充的切图辅助区样式 */
-        .debug-box { background: #fee2e2; border: 1px dashed #ef4444; padding: 12px; border-radius: 10px; margin-top: 16px; display: none; }
-        .debug-canvas { width: 100%; max-width: 400px; border: 1px solid #cbd5e1; margin-top: 8px; border-radius: 6px; }
-    </style>
 </head>
 <body>
+    <div class="status-log" id="status-log">初始化加载中...</div>
+    <input type="file" id="image-loader" accept="image/*" multiple onchange="handleImageUpload(event)">
+    <div class="debug-box" id="debug-box"><canvas id="canvas-normalized"></canvas></div>
 
-    <div class="header">
-        <h1>卡皮巴拉一键自动规划器</h1>
-        <div style="font-size: 11px; color:#64748b; margin-top:4px;">iOS / iPadOS OpenCV 纯前端像素雷达已激活</div>
-    </div>
+    <script>
+        // 1. 预定义核心变量
+        let cvReady = false;
 
-    <div class="mode-container">
-        <div class="mode-btn active" id="btn-ai" onclick="setMode('ai')">AI 智能规划</div>
-        <div class="mode-btn" id="btn-custom" onclick="setMode('custom')">自定义优先</div>
-    </div>
+        // 2. 日志系统（确保即使 logger 还没生成也能缓存信息）
+        function log(msg) {
+            console.log(msg);
+            const logger = document.getElementById('status-log');
+            if (logger) {
+                logger.innerText += "\n> " + msg;
+                logger.scrollTop = logger.scrollHeight;
+            }
+        }
 
-    <div class="dashboard-card">
-        <div class="dashboard-title">👑 今日推荐最优行动方案</div>
-        <div class="strategy-output" id="plan-headline">等待数据导入...</div>
-        <div class="strategy-details" id="plan-details">
-            请在下方一键上传游戏截图。系统已激活全设备归一化与 Tesseract OCR 引擎，将自动提取 13 项变动物资数量。
-        </div>
-    </div>
+        // 3. 核心加载检测
+        function onOpenCvReady() {
+            cvReady = true;
+            log("✅ OpenCV 算力内核已就绪");
+        }
 
-    <div class="upload-zone">
-        <div class="upload-tip">📸 点击这里选择相册截图</div>
-        <div class="upload-subtip">支持 Safari，纯本地运算，绝对安全不封号</div>
-        <input type="file" id="image-loader" accept="image/*" multiple onchange="handleImageUpload(event)">
-    </div>
+        // 4. 你的 handleImageUpload 函数（放入刚才的强制检查逻辑）
+        async function handleImageUpload(event) {
+            if (!cvReady) {
+                log("⏳ 内核正在热启动，请等待...");
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            if (!cvReady) {
+                log("❌ 初始化超时，请检查 CDN 链接是否被拦截。");
+                return;
+            }
+            
+            // 下面放入你原本的完整图像处理逻辑...
+            log("开始处理图像...");
+            // (此处保持你原本的图像处理代码)
+        }
+    </script>
 
-    <div class="accordion-header" onclick="toggleAccordion()">
-        <span>📦 查看 / 手动微调资产库存</span>
-        <span class="accordion-arrow" id="accordion-arrow">▼</span>
-    </div>
-    
-    <div class="accordion-content" id="inventory-panel">
-        <div class="input-group-title">⚡ 基础消耗 & 补给箱</div>
-        <div class="input-item"><label>体力 (tl)</label><input type="number" id="input_tl" value="0" oninput="updateItemData('tl', this.value)"></div>
-        <div class="input-item"><label>限定/传说 (xd)</label><input type="number" id="input_xd" value="0" oninput="updateItemData('xd', this.value)"></div>
-        <div class="input-item"><label>英雄补给箱 (yx)</label><input type="number" id="input_yx" value="0" oninput="updateItemData('yx', this.value)"></div>
-        <div class="input-item"><label>冒险者补给箱 (mzx)</label><input type="number" id="input_mzx" value="0" oninput="updateItemData('mzx', this.value)"></div>
-
-        <div class="input-group-title">🎁 宝箱系列</div>
-        <div class="input-item"><label>青铜宝箱 (bx_qt)</label><input type="number" id="input_bx_qt" value="0" oninput="updateItemData('bx_qt', this.value)"></div>
-        <div class="input-item"><label>白银宝箱 (bx_by)</label><input type="number" id="input_bx_by" value="0" oninput="updateItemData('bx_by', this.value)"></div>
-        <div class="input-item"><label>黄金宝箱 (bx_hj)</label><input type="number" id="input_bx_hj" value="0" oninput="updateItemData('bx_hj', this.value)"></div>
-        <div class="input-item"><label>宠物宝箱 (bx_cw)</label><input type="number" id="input_bx_cw" value="0" oninput="updateItemData('bx_cw
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/opencv.js/4.8.0/opencv.js" onload="onOpenCvReady();"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</body>
+</html>
